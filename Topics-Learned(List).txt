@@ -11,3 +11,11 @@ Video-8:
 * cors package
 * cookie-parser package
 
+Video-9:
+* mongoose-aggregate-paginate-v2 package
+* bcrypt package
+* jsonwebtoken package
+
+- ACCESS_TOKEN_SECRET
+- REFRESH_TOKEN_SECRET
+
