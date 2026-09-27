@@ -1,7 +1,13 @@
 ### Topics Learned
 
-* prettier
-* nodemon
+Video 7: 
+* prettier package
+* nodemon package
 * iify
 * modular way of connecting to DB from db folder
 * Node's process.exit()  and exit(0), exit(1) etc 
+
+Video-8: 
+* cors package
+* cookie-parser package
+
