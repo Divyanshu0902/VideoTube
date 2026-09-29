@@ -11,3 +11,21 @@ return another function as its output. It has been used in project for creating 
 
 2. also since encryption is a lengthy process, always make sure to also write async before that callback.<br> 
 3. and also don't forget to put "next" as the parameter of this callback since this is essentially a mongoDB middleware.<br>
+
+
+# Video 10:
+1. When we are using Cloudinary service to upload file on it via the multer package,
+in production practice, the file is temporarily stored on local servers before uploading it to cloudinary,
+so that in case there is a cloudinary upload failure, the reattempt can be easily done using the file 
+that is already present on the local server. <br>
+2. when we delete a file using the "fs" module of node.js, it's an Operating System concept that
+that so called deleted file is not actually deleted, rather just its path is "unlinked" and therefore,
+node.js "fs" module also provides this functionality under the name of "unlink".<br>
+3. when we are storing the file temporarily on server, before uploading it on cloudinary(inside multer.middleware.js), the file can be renamed with random character suffixed against its original name to avoid confusion among multiple files with same name.
+
+# Video 11: 
+## HTTP
+1. screenshots dekho
+
+
+# Video 12: 
