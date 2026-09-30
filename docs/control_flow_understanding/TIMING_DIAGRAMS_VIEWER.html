@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>YouTube Backend - Event Sequence & Timing Diagrams</title>
+  <!-- Mermaid & Panzoom libraries -->
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@panzoom/panzoom@4.5.1/dist/panzoom.min.js"></script>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    body {
+      background-color: #0b0f19;
+      color: #f1f5f9;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      padding: 24px 20px 80px 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+    }
+    header {
+      text-align: center;
+      margin-bottom: 28px;
+      max-width: 1000px;
+      width: 100%;
+    }
+    h1 {
+      font-size: 26px;
+      color: #38bdf8;
+      margin-bottom: 8px;
+    }
+    p.subtitle {
+      color: #94a3b8;
+      font-size: 15px;
+    }
+    .section-card {
+      background: #111827;
+      border: 1px solid #1f2937;
+      border-radius: 14px;
+      padding: 24px;
+      margin-bottom: 32px;
+      max-width: 1100px;
+      width: 100%;
+      box-shadow: 0 12px 30px rgba(0,0,0,0.6);
+    }
+    .section-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 18px;
+      border-bottom: 1px solid #334155;
+      padding-bottom: 12px;
+    }
+    h2 {
+      font-size: 19px;
+      color: #f8fafc;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .tag {
+      background: #0369a1;
+      color: #e0f2fe;
+      font-size: 12px;
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-weight: 600;
+      text-transform: uppercase;
+    }
+    .zoom-wrapper {
+      width: 100%;
+      height: 600px;
+      background: #0f172a;
+      border-radius: 10px;
+      border: 1px solid #1e293b;
+      overflow: hidden;
+      position: relative;
+      cursor: grab;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .zoom-wrapper:active {
+      cursor: grabbing;
+    }
+    .panzoom-target {
+      padding: 40px;
+      transform-origin: center center;
+      display: inline-block;
+    }
+    .floating-toolbar {
+      position: absolute;
+      bottom: 14px;
+      right: 14px;
+      display: flex;
+      gap: 6px;
+      background: #1e293b;
+      padding: 6px 10px;
+      border-radius: 20px;
+      border: 1px solid #334155;
+      z-index: 10;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+    }
+    .btn {
+      background: #334155;
+      color: #f8fafc;
+      border: none;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 15px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .btn:hover {
+      background: #38bdf8;
+      color: #0f172a;
+    }
+    .nav-hints {
+      font-size: 12px;
+      color: #64748b;
+      margin-top: 8px;
+      text-align: right;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>⏱️ YouTube Backend Sequence & Timing Diagrams</h1>
+    <p class="subtitle">Chronological Execution Order: Server Initialization ➔ Middleware Pipeline ➔ DB ➔ Request & Response</p>
+  </header>
+
+  <!-- ================= PART 1: HIGH-LEVEL TIMING DIAGRAM ================= -->
+  <div class="section-card">
+    <div class="section-header">
+      <h2>1. High-Level Timing & Sequence Overview</h2>
+      <span class="tag">Overview</span>
+    </div>
+    
+    <div class="zoom-wrapper" id="wrapper1">
+      <div class="panzoom-target" id="target1">
+        <div class="mermaid">
+sequenceDiagram
+    autonumber
+    actor Dev as Developer / Script
+    participant Index as src/index.js
+    participant App as src/app.js (Express)
+    participant DB as MongoDB (videotube)
+    actor Client as HTTP Client / User
+    participant Cloud as Cloudinary CDN
+
+    Note over Dev, DB: ⚡ Phase 1: Server Startup & DB Handshake
+    Dev->>Index: npm run dev (nodemon src/index.js)
+    Index->>Index: dotenv.config() (Loads .env)
+    Index->>App: Imports configured Express App
+    Index->>DB: connectDB() (mongoose.connect)
+    DB-->>Index: DB Connected Successfully!
+    Index->>App: app.listen(8000) Server Ready
+
+    Note over Client, DB: 🚀 Phase 2: Request Lifecycle (POST /register)
+    Client->>App: POST /api/v1/users/register (Multipart Form + Avatar)
+    App->>App: Global Middlewares (CORS, JSON, Multer disk save)
+    App->>Cloud: uploadOnCloudinary(tempFilePath)
+    Cloud-->>App: Image Uploaded (Returns CDN URL)
+    App->>DB: User.create() (pre-save bcrypt hash + save doc)
+    DB-->>App: User Record Created
+    App-->>Client: HTTP 201 (ApiResponse: Success JSON)
+        </div>
+      </div>
+      <div class="floating-toolbar">
+        <button class="btn" id="zin1" title="Zoom In">+</button>
+        <button class="btn" id="zout1" title="Zoom Out">−</button>
+        <button class="btn" id="rst1" title="Reset View">⟲</button>
+      </div>
+    </div>
+    <div class="nav-hints">💡 Use mouse wheel to zoom (up to 50x) • Click and drag canvas to pan</div>
+  </div>
+
+  <!-- ================= PART 2: DETAILED STEP-BY-STEP TIMING DIAGRAM ================= -->
+  <div class="section-card">
+    <div class="section-header">
+      <h2>2. Detailed Step-by-Step Timing Diagram (Every Single Event)</h2>
+      <span class="tag">Deep Dive</span>
+    </div>
+    
+    <div class="zoom-wrapper" id="wrapper2" style="height: 850px;">
+      <div class="panzoom-target" id="target2">
+        <div class="mermaid">
+sequenceDiagram
+    autonumber
+    actor Dev as Developer
+    participant Node as Node Runtime
+    participant Index as src/index.js
+    participant DBModule as src/db/index.js
+    participant Mongo as MongoDB Atlas
+    participant App as src/app.js
+    participant Router as src/routes/user.routes.js
+    participant Multer as multer.middleware.js
+    participant Disk as ./public/temp (Disk)
+    participant Controller as user.controller.js
+    participant Cloudinary as src/utils/cloudinary.js
+    participant Model as src/models/user.model.js
+    actor Client as Client / Browser
+
+    Note over Dev, Mongo: 🟢 STARTUP TIMELINE (t0 -> t4)
+    Dev->>Node: npm run dev
+    Node->>Index: Execute src/index.js
+    Index->>Index: dotenv.config({ path: "./env" })
+    Index->>App: Import app (Initializes CORS, JSON limits, CookieParser)
+    Index->>DBModule: Call connectDB()
+    DBModule->>Mongo: mongoose.connect(MONGODB_URI + "/videotube")
+    Mongo-->>DBModule: Connection Established (Host info returned)
+    DBModule-->>Index: Promise Resolved
+    Index->>App: app.on("error") listener attached
+    Index->>App: app.listen(PORT=8000) Starts HTTP Server
+    Note over Index, App: Server listening on port 8000. Ready for requests!
+
+    Note over Client, Controller: 🔵 REQUEST TIMELINE (POST /api/v1/users/register)
+    Client->>App: HTTP POST /api/v1/users/register (Multipart Form Data)
+    App->>App: cors() checks origin header
+    App->>App: express.json() & express.urlencoded() parse body
+    App->>App: cookieParser() parses incoming cookies
+    App->>Router: Forward to /api/v1/users route
+
+    Note over Router, Disk: 📂 File Interception
+    Router->>Multer: upload.fields([{ name: "avatar" }, { name: "coverImage" }])
+    Multer->>Disk: Save avatar to ./public/temp/avatar-timestamp
+    Multer->>Disk: Save coverImage to ./public/temp/cover-timestamp
+    Multer-->>Router: Attach req.files & req.body to request object
+
+    Note over Router, Controller: ⚙️ Controller Execution
+    Router->>Controller: invoke registerUser via asyncHandler wrapper
+    Controller->>Controller: Validate required fields (username, email, password, avatar)
+    Controller->>Model: User.findOne({ $or: [{ username }, { email }] })
+    Model->>Mongo: Query users collection
+    Mongo-->>Model: User does not exist (null)
+    Model-->>Controller: Proceed with registration
+
+    Note over Controller, Cloudinary: ☁️ Cloudinary Upload & Cleanup
+    Controller->>Cloudinary: uploadOnCloudinary(avatarLocalPath)
+    Cloudinary->>Disk: Read local temporary avatar file
+    Cloudinary->>Cloudinary: Push image to Cloudinary CDN
+    Cloudinary->>Disk: fs.unlinkSync(avatarLocalPath) [Deletes temp file]
+    Cloudinary-->>Controller: Returns avatar CDN URL
+
+    Note over Controller, Mongo: 🔒 Password Encryption & DB Persistence
+    Controller->>Model: User.create({ username, email, fullName, avatar, password })
+    Model->>Model: userSchema.pre("save") hook triggered
+    Model->>Model: bcrypt.hash(password, 10) creates secure hash
+    Model->>Mongo: Persist user document to 'videotube' DB
+    Mongo-->>Model: User document saved with _id
+    Model-->>Controller: Created user document returned
+
+    Note over Controller, Client: 📤 Token Generation & Response Delivery
+    Controller->>Model: user.generateAccessToken() & user.generateRefreshToken()
+    Model-->>Controller: Signed JWT tokens
+    Controller->>Controller: Construct new ApiResponse(201, createdUser, "User registered successfully")
+    Controller-->>App: Send HTTP 201 JSON response
+    App-->>Client: { statusCode: 201, data: {...}, message: "Success", success: true }
+        </div>
+      </div>
+      <div class="floating-toolbar">
+        <button class="btn" id="zin2" title="Zoom In">+</button>
+        <button class="btn" id="zout2" title="Zoom Out">−</button>
+        <button class="btn" id="rst2" title="Reset View">⟲</button>
+      </div>
+    </div>
+    <div class="nav-hints">💡 Use mouse wheel to zoom (up to 50x) • Click and drag canvas to pan</div>
+  </div>
+
+  <script>
+    mermaid.initialize({
+      startOnLoad: true,
+      theme: 'dark',
+      sequence: {
+        diagramMarginX: 50,
+        diagramMarginY: 30,
+        actorMargin: 50,
+        width: 160,
+        height: 50,
+        boxMargin: 10,
+        boxTextMargin: 5,
+        noteMargin: 10,
+        messageMargin: 35,
+        mirrorActors: true,
+        useMaxWidth: false
+      },
+      themeVariables: {
+        fontSize: '14px',
+        primaryColor: '#1e293b',
+        primaryTextColor: '#f8fafc',
+        primaryBorderColor: '#38bdf8',
+        lineColor: '#38bdf8',
+        secondaryColor: '#334155',
+        tertiaryColor: '#0f172a',
+        signalColor: '#38bdf8',
+        signalTextColor: '#f1f5f9',
+        actorBkg: '#1e293b',
+        actorBorder: '#38bdf8',
+        actorTextColor: '#38bdf8',
+        noteBkgColor: '#1e293b',
+        noteTextColor: '#fbbf24',
+        noteBorderColor: '#f59e0b'
+      }
+    });
+
+    function setupPanzoom(wrapperId, targetId, inBtnId, outBtnId, resetBtnId) {
+      const elem = document.getElementById(targetId);
+      const wrapper = document.getElementById(wrapperId);
+
+      const pz = Panzoom(elem, {
+        maxScale: 50,
+        minScale: 0.2,
+        step: 0.3,
+        contain: 'none',
+        cursor: 'grab'
+      });
+
+      wrapper.addEventListener('wheel', (e) => {
+        pz.zoomWithWheel(e);
+      });
+
+      document.getElementById(inBtnId).addEventListener('click', () => pz.zoomIn());
+      document.getElementById(outBtnId).addEventListener('click', () => pz.zoomOut());
+      document.getElementById(resetBtnId).addEventListener('click', () => pz.reset());
+    }
+
+    window.addEventListener('load', () => {
+      setupPanzoom('wrapper1', 'target1', 'zin1', 'zout1', 'rst1');
+      setupPanzoom('wrapper2', 'target2', 'zin2', 'zout2', 'rst2');
+    });
+  </script>
+</body>
+</html>

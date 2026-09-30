@@ -23,3 +23,5 @@ Video-10:
 * cloudinary package
 * multer package
 
+Video-12:
+* POSTMAN Tool for API Testing
