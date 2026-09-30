@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>YouTube Backend Architecture - Ultra Zoom & Pan Viewer</title>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@panzoom/panzoom@4.5.1/dist/panzoom.min.js"></script>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    body {
+      background-color: #0b0f19;
+      color: #f1f5f9;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      overflow: hidden;
+      height: 100vh;
+      width: 100vw;
+      display: flex;
+      flex-direction: column;
+    }
+    header {
+      background: #111827;
+      padding: 12px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid #1f2937;
+      z-index: 10;
+    }
+    h1 {
+      font-size: 18px;
+      color: #38bdf8;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .hint {
+      font-size: 13px;
+      color: #94a3b8;
+    }
+    .viewport {
+      flex: 1;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      position: relative;
+      cursor: grab;
+      background: radial-gradient(circle at center, #1e293b 0%, #0b0f19 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .viewport:active {
+      cursor: grabbing;
+    }
+    #panzoom-element {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 100px;
+      transform-origin: center center;
+    }
+    /* Controls Bar */
+    .controls {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: #1e293b;
+      padding: 8px 16px;
+      border-radius: 30px;
+      border: 1px solid #334155;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.7);
+      z-index: 20;
+    }
+    .zoom-badge {
+      font-size: 13px;
+      font-weight: 600;
+      color: #38bdf8;
+      min-width: 55px;
+      text-align: center;
+    }
+    .btn {
+      background: #334155;
+      color: #f8fafc;
+      border: none;
+      min-width: 38px;
+      height: 38px;
+      padding: 0 10px;
+      border-radius: 19px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.1s;
+    }
+    .btn:hover {
+      background: #38bdf8;
+      color: #0f172a;
+    }
+    .btn:active {
+      transform: scale(0.95);
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>🎬 YouTube Backend Architecture & Control Flow</h1>
+    <span class="hint">🔍 Scroll wheel to zoom (up to 5000%) • Drag to move freely • No cutoffs</span>
+  </header>
+
+  <div class="viewport" id="viewport">
+    <div id="panzoom-element">
+      <div class="mermaid">
+flowchart TD
+    subgraph Bootstrapping ["1. Application Bootstrapping"]
+        A["package.json (npm run dev)"] --> B["src/index.js"]
+        B --> C["dotenv.config()"]
+        B --> D["connectDB() (src/db/index.js)"]
+        D -->|"Connect to MongoDB"| DB[("MongoDB (videotube)")]
+        D -->|"On Success"| E["app.listen(PORT)"]
+    end
+
+    subgraph AppPipeline ["2. App & Middleware Pipeline"]
+        E --> F["src/app.js (Express App)"]
+        F --> G1["cors()"]
+        G1 --> G2["express.json() & express.urlencoded()"]
+        G2 --> G3["express.static('public')"]
+        G3 --> G4["cookieParser()"]
+    end
+
+    subgraph Routing ["3. Route Dispatching"]
+        G4 --> H["app.use('/api/v1/users', userRouter)"]
+        H --> I["src/routes/user.routes.js"]
+        I -->|"POST /register"| J["Multer Middleware (multer.middleware.js)"]
+    end
+
+    subgraph ControllerLogic ["4. Controller & Business Logic"]
+        J -->|"Save file to ./public/temp"| K["registerUser (user.controller.js)"]
+        K --> L["asyncHandler Wrapper (asyncHandler.js)"]
+        K --> M["uploadOnCloudinary (cloudinary.js)"]
+        M -->|"Upload & Remove temp file"| CLOUD[("Cloudinary CDN")]
+        K --> N["User Model (user.model.js)"]
+    end
+
+    subgraph DatabaseLayer ["5. Model & Database Layer"]
+        N -->|"pre('save') hook"| O["bcrypt.hash()"]
+        N -->|"generateAccessToken / RefreshToken"| P["jsonwebtoken (JWT)"]
+        N -->|"Save document"| DB
+    end
+
+    subgraph ResponseFlow ["6. Response Delivery"]
+        K --> Q["ApiResponse (ApiResponse.js)"]
+        L -->|"On Error"| R["ApiError (ApiError.js)"]
+        Q --> S["Client (HTTP 200/201 JSON)"]
+        R --> S
+    end
+      </div>
+    </div>
+  </div>
+
+  <div class="controls">
+    <span class="zoom-badge" id="scale-badge">100%</span>
+    <button class="btn" id="zoom-in" title="Zoom In">+</button>
+    <button class="btn" id="zoom-out" title="Zoom Out">−</button>
+    <button class="btn" id="reset" title="Fit & Center">Fit View</button>
+  </div>
+
+  <script>
+    mermaid.initialize({
+      startOnLoad: true,
+      theme: 'dark',
+      themeVariables: {
+        fontSize: '17px',
+        primaryColor: '#1e293b',
+        primaryTextColor: '#f8fafc',
+        primaryBorderColor: '#38bdf8',
+        lineColor: '#38bdf8',
+        secondaryColor: '#334155',
+        tertiaryColor: '#0f172a'
+      }
+    });
+
+    window.addEventListener('load', () => {
+      const elem = document.getElementById('panzoom-element');
+      const badge = document.getElementById('scale-badge');
+      
+      const panzoom = Panzoom(elem, {
+        maxScale: 50,    // Allows up to 5000% zoom
+        minScale: 0.1,   // Allows zoom out down to 10%
+        step: 0.3,
+        contain: 'none', // No boundary walls; pan anywhere without clipping
+        cursor: 'grab'
+      });
+
+      const parent = elem.parentElement;
+      parent.addEventListener('wheel', (e) => {
+        panzoom.zoomWithWheel(e);
+      });
+
+      elem.addEventListener('panzoomchange', (e) => {
+        const scale = Math.round(e.detail.scale * 100);
+        badge.textContent = scale + '%';
+      });
+
+      document.getElementById('zoom-in').addEventListener('click', () => panzoom.zoomIn());
+      document.getElementById('zoom-out').addEventListener('click', () => panzoom.zoomOut());
+      document.getElementById('reset').addEventListener('click', () => panzoom.reset());
+    });
+  </script>
+</body>
+</html>

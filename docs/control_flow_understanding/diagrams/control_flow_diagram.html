@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YouTube Backend Architecture & Control Flow</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: #0b0f19;
+            color: #f1f5f9;
+            margin: 0;
+            padding: 40px 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        h1 {
+            color: #38bdf8;
+            margin-bottom: 6px;
+            text-align: center;
+        }
+        p.subtitle {
+            color: #94a3b8;
+            margin-top: 0;
+            margin-bottom: 30px;
+            text-align: center;
+            font-size: 16px;
+        }
+        .canvas-card {
+            background: #111827;
+            border: 1px solid #1f2937;
+            border-radius: 16px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.6);
+            max-width: 950px;
+            width: 100%;
+            display: flex;
+            justify-content: center;
+        }
+        svg {
+            width: 100%;
+            height: auto;
+            max-width: 880px;
+        }
+    </style>
+</head>
+<body>
+    <h1>🎬 YouTube Backend Request & Control Flow</h1>
+    <p class="subtitle">Complete Request Journey: Bootstrapping ➔ Middlewares ➔ Routing ➔ Controller ➔ DB ➔ Response</p>
+    
+    <div class="canvas-card">
+        <svg viewBox="0 0 880 1120" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <!-- Definitions for Gradients and Markers -->
+            <defs>
+                <linearGradient id="primaryGrad" x1="0" y1="0" x2="1" y2="1">
+                    <stop offset="0%" stop-color="#1e293b"/>
+                    <stop offset="100%" stop-color="#0f172a"/>
+                </linearGradient>
+                <linearGradient id="accentGrad" x1="0" y1="0" x2="1" y2="0">
+                    <stop offset="0%" stop-color="#38bdf8"/>
+                    <stop offset="100%" stop-color="#818cf8"/>
+                </linearGradient>
+                <marker id="arrow" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                    <path d="M 0 1 L 10 5 L 0 9 z" fill="#38bdf8" />
+                </marker>
+                <marker id="arrow-green" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                    <path d="M 0 1 L 10 5 L 0 9 z" fill="#34d399" />
+                </marker>
+                <filter id="glow" x="-10%" y="-10%" width="120%" height="120%">
+                    <feDropShadow dx="0" dy="4" stdDeviation="6" flood-color="#38bdf8" flood-opacity="0.15"/>
+                </filter>
+            </defs>
+
+            <!-- 1. BOOTSTRAPPING SECTION -->
+            <rect x="20" y="20" width="840" height="140" rx="12" fill="#1e293b" stroke="#334155" stroke-width="1.5" />
+            <rect x="20" y="20" width="840" height="34" rx="12" fill="#334155" />
+            <text x="40" y="43" fill="#38bdf8" font-size="14" font-weight="bold" letter-spacing="1">1. SERVER BOOTSTRAPPING & DB CONNECTION</text>
+            
+            <!-- Box 1a: package.json -->
+            <rect x="45" y="70" width="220" height="65" rx="8" fill="#0f172a" stroke="#475569" stroke-width="1.2" />
+            <text x="60" y="95" fill="#f8fafc" font-size="13" font-weight="600">package.json ("npm run dev")</text>
+            <text x="60" y="115" fill="#94a3b8" font-size="11">nodemon src/index.js</text>
+
+            <!-- Line 1a -> 1b -->
+            <line x1="265" y1="102" x2="310" y2="102" stroke="#38bdf8" stroke-width="2" marker-end="url(#arrow)" />
+
+            <!-- Box 1b: src/index.js -->
+            <rect x="315" y="70" width="240" height="65" rx="8" fill="#0f172a" stroke="#475569" stroke-width="1.2" />
+            <text x="330" y="95" fill="#f8fafc" font-size="13" font-weight="600">src/index.js</text>
+            <text x="330" y="115" fill="#94a3b8" font-size="11">dotenv.config() & connectDB()</text>
+
+            <!-- Line 1b -> 1c -->
+            <line x1="555" y1="102" x2="600" y2="102" stroke="#38bdf8" stroke-width="2" marker-end="url(#arrow)" />
+
+            <!-- Box 1c: MongoDB & Listen -->
+            <rect x="605" y="70" width="230" height="65" rx="8" fill="#0f172a" stroke="#22c55e" stroke-width="1.2" />
+            <text x="620" y="95" fill="#4ade80" font-size="13" font-weight="600">MongoDB ('videotube')</text>
+            <text x="620" y="115" fill="#94a3b8" font-size="11">app.listen(8000) Starts Server</text>
+
+            <!-- Connector down to 2 -->
+            <line x1="720" y1="135" x2="720" y2="185" stroke="#38bdf8" stroke-width="2" />
+            <line x1="720" y1="185" x2="440" y2="185" stroke="#38bdf8" stroke-width="2" />
+            <line x1="440" y1="185" x2="440" y2="205" stroke="#38bdf8" stroke-width="2" marker-end="url(#arrow)" />
+
+            <!-- 2. EXPRESS MIDDLEWARE PIPELINE -->
+            <rect x="20" y="210" width="840" height="150" rx="12" fill="#1e293b" stroke="#334155" stroke-width="1.5" />
+            <rect x="20" y="210" width="840" height="34" rx="12" fill="#334155" />
+            <text x="40" y="233" fill="#38bdf8" font-size="14" font-weight="bold" letter-spacing="1">2. EXPRESS APP & GLOBAL MIDDLEWARE PIPELINE (src/app.js)</text>
+
+            <!-- Middleware Badges -->
+            <rect x="45" y="260" width="140" height="75" rx="8" fill="#0f172a" stroke="#6366f1" stroke-width="1.2" />
+            <text x="60" y="288" fill="#a5b4fc" font-size="13" font-weight="bold">cors()</text>
+            <text x="60" y="310" fill="#94a3b8" font-size="11">CORS Security</text>
+
+            <rect x="205" y="260" width="195" height="75" rx="8" fill="#0f172a" stroke="#6366f1" stroke-width="1.2" />
+            <text x="220" y="288" fill="#a5b4fc" font-size="13" font-weight="bold">express.json()</text>
+            <text x="220" y="310" fill="#94a3b8" font-size="11">Body Parser (limit 16kb)</text>
+
+            <rect x="420" y="260" width="205" height="75" rx="8" fill="#0f172a" stroke="#6366f1" stroke-width="1.2" />
+            <text x="435" y="288" fill="#a5b4fc" font-size="13" font-weight="bold">express.urlencoded()</text>
+            <text x="435" y="310" fill="#94a3b8" font-size="11">Form URL decoder</text>
+
+            <rect x="645" y="260" width="190" height="75" rx="8" fill="#0f172a" stroke="#6366f1" stroke-width="1.2" />
+            <text x="660" y="288" fill="#a5b4fc" font-size="13" font-weight="bold">cookieParser()</text>
+            <text x="660" y="310" fill="#94a3b8" font-size="11">Cookie Parser</text>
+
+            <!-- Connector down to 3 -->
+            <line x1="440" y1="360" x2="440" y2="395" stroke="#38bdf8" stroke-width="2" marker-end="url(#arrow)" />
+
+            <!-- 3. ROUTING LAYER -->
+            <rect x="20" y="400" width="840" height="110" rx="12" fill="#1e293b" stroke="#334155" stroke-width="1.5" />
+            <rect x="20" y="400" width="840" height="34" rx="12" fill="#334155" />
+            <text x="40" y="423" fill="#38bdf8" font-size="14" font-weight="bold" letter-spacing="1">3. ROUTING LAYER & ENDPOINT DISPATCHING</text>
+
+            <rect x="45" y="445" width="360" height="50" rx="8" fill="#0f172a" stroke="#475569" stroke-width="1.2" />
+            <text x="60" y="475" fill="#f8fafc" font-size="13">Prefix: <tspan fill="#38bdf8" font-weight="bold">/api/v1/users</tspan> (src/app.js)</text>
+
+            <line x1="405" y1="470" x2="475" y2="470" stroke="#38bdf8" stroke-width="2" marker-end="url(#arrow)" />
+
+            <rect x="480" y="445" width="355" height="50" rx="8" fill="#0f172a" stroke="#475569" stroke-width="1.2" />
+            <text x="495" y="475" fill="#f8fafc" font-size="13">Route: <tspan fill="#4ade80" font-weight="bold">POST /register</tspan> (user.routes.js)</text>
+
+            <!-- Connector down to 4 -->
+            <line x1="657" y1="495" x2="657" y2="535" stroke="#38bdf8" stroke-width="2" marker-end="url(#arrow)" />
+
+            <!-- 4. MULTER & CLOUDINARY FILE PROCESSING -->
+            <rect x="20" y="540" width="840" height="130" rx="12" fill="#1e293b" stroke="#334155" stroke-width="1.5" />
+            <rect x="20" y="540" width="840" height="34" rx="12" fill="#334155" />
+            <text x="40" y="563" fill="#38bdf8" font-size="14" font-weight="bold" letter-spacing="1">4. FILE UPLOAD & CLOUD STORAGE PIPELINE</text>
+
+            <rect x="45" y="585" width="360" height="65" rx="8" fill="#0f172a" stroke="#f59e0b" stroke-width="1.2" />
+            <text x="60" y="610" fill="#fbbf24" font-size="13" font-weight="bold">Multer Middleware (multer.middleware.js)</text>
+            <text x="60" y="632" fill="#94a3b8" font-size="11">Saves avatar / coverImage to ./public/temp</text>
+
+            <line x1="405" y1="617" x2="475" y2="617" stroke="#38bdf8" stroke-width="2" marker-end="url(#arrow)" />
+
+            <rect x="480" y="585" width="355" height="65" rx="8" fill="#0f172a" stroke="#38bdf8" stroke-width="1.2" />
+            <text x="495" y="610" fill="#38bdf8" font-size="13" font-weight="bold">Cloudinary Utility (cloudinary.js)</text>
+            <text x="495" y="632" fill="#94a3b8" font-size="11">Uploads to CDN ➔ Removes local temp file</text>
+
+            <!-- Connector down to 5 -->
+            <line x1="440" y1="670" x2="440" y2="705" stroke="#38bdf8" stroke-width="2" marker-end="url(#arrow)" />
+
+            <!-- 5. CONTROLLER & BUSINESS LOGIC -->
+            <rect x="20" y="710" width="840" height="140" rx="12" fill="#1e293b" stroke="#334155" stroke-width="1.5" />
+            <rect x="20" y="710" width="840" height="34" rx="12" fill="#334155" />
+            <text x="40" y="733" fill="#38bdf8" font-size="14" font-weight="bold" letter-spacing="1">5. CONTROLLER LAYER & ASYNC WRAPPER</text>
+
+            <rect x="45" y="755" width="360" height="75" rx="8" fill="#0f172a" stroke="#a855f7" stroke-width="1.2" />
+            <text x="60" y="780" fill="#c084fc" font-size="13" font-weight="bold">asyncHandler (asyncHandler.js)</text>
+            <text x="60" y="802" fill="#94a3b8" font-size="11">Higher Order Function catching unhandled</text>
+            <text x="60" y="818" fill="#94a3b8" font-size="11">Promise errors ➔ passes to next(err)</text>
+
+            <line x1="405" y1="792" x2="475" y2="792" stroke="#38bdf8" stroke-width="2" marker-end="url(#arrow)" />
+
+            <rect x="480" y="755" width="355" height="75" rx="8" fill="#0f172a" stroke="#ec4899" stroke-width="1.2" />
+            <text x="495" y="780" fill="#f472b6" font-size="13" font-weight="bold">registerUser (user.controller.js)</text>
+            <text x="495" y="802" fill="#94a3b8" font-size="11">Validates fields, uploads images, writes</text>
+            <text x="495" y="818" fill="#94a3b8" font-size="11">user record to database</text>
+
+            <!-- Connector down to 6 -->
+            <line x1="657" y1="850" x2="657" y2="885" stroke="#38bdf8" stroke-width="2" marker-end="url(#arrow)" />
+
+            <!-- 6. DATA & MODEL LAYER -->
+            <rect x="20" y="890" width="840" height="110" rx="12" fill="#1e293b" stroke="#334155" stroke-width="1.5" />
+            <rect x="20" y="890" width="840" height="34" rx="12" fill="#334155" />
+            <text x="40" y="913" fill="#38bdf8" font-size="14" font-weight="bold" letter-spacing="1">6. MODEL & DATABASE SECURITY LAYER (user.model.js)</text>
+
+            <rect x="45" y="935" width="360" height="50" rx="8" fill="#0f172a" stroke="#10b981" stroke-width="1.2" />
+            <text x="60" y="957" fill="#34d399" font-size="12" font-weight="bold">pre("save") Hook</text>
+            <text x="60" y="974" fill="#94a3b8" font-size="11">bcrypt.hash() hashes passwords</text>
+
+            <rect x="480" y="935" width="355" height="50" rx="8" fill="#0f172a" stroke="#10b981" stroke-width="1.2" />
+            <text x="495" y="957" fill="#34d399" font-size="12" font-weight="bold">JWT Token Generators</text>
+            <text x="495" y="974" fill="#94a3b8" font-size="11">generateAccessToken & generateRefreshToken</text>
+
+            <!-- Connector down to 7 -->
+            <line x1="440" y1="1000" x2="440" y2="1035" stroke="#38bdf8" stroke-width="2" marker-end="url(#arrow)" />
+
+            <!-- 7. RESPONSE & ERROR DELIVERY -->
+            <rect x="20" y="1040" width="840" height="65" rx="12" fill="#0f172a" stroke="#38bdf8" stroke-width="1.5" />
+            <text x="40" y="1078" fill="#38bdf8" font-size="14" font-weight="bold">7. RESPONSE DELIVERY:</text>
+            <text x="230" y="1078" fill="#4ade80" font-size="13" font-weight="bold">Success: ApiResponse (200/201 JSON)</text>
+            <text x="560" y="1078" fill="#f87171" font-size="13" font-weight="bold">Failure: ApiError (Error JSON)</text>
+        </svg>
+    </div>
+</body>
+</html>
