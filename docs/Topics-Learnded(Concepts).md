@@ -29,3 +29,37 @@ node.js "fs" module also provides this functionality under the name of "unlink".
 
 
 # Video 12: 
+
+# Antigravity Project Audit: 
+## Complete Backend Control Flow (Start to End)
+1. **App Bootstrapping (`src/index.js` & `src/db/index.js`)**:
+   - `dotenv.config()` loads environment variables.
+   - `connectDB()` connects to MongoDB (`videotube`).
+   - `app.listen(PORT)` starts the Express server once DB is connected.
+
+2. **Express Middlewares Pipeline (`src/app.js`)**:
+   - `cors()`: Cross-Origin setup.
+   - `express.json({ limit: "16kb" })`: Parses incoming JSON body.
+   - `express.urlencoded({ extended: true, limit: "16kb" })`: Parses URL query/form data.
+   - `express.static("public")`: Serves static assets/temp files.
+   - `cookieParser()`: Access and parse request cookies.
+
+3. **Routing (`src/routes/user.routes.js`)**:
+   - Routes mounted at `/api/v1/users` in `app.js`.
+   - Specific route (e.g. `POST /register`) triggers middlewares and controller.
+
+4. **Multer & Cloudinary Pipeline**:
+   - **Multer Middleware (`src/middlewares/multer.middleware.js`)**: Saves uploaded files temporarily into `./public/temp`.
+   - **Cloudinary Utility (`src/utils/cloudinary.js`)**: Uploads the file from `./public/temp` to Cloudinary CDN, returns the URL, and deletes local temp file using `fs.unlinkSync()`.
+
+5. **Controller & Wrapper (`src/controllers/user.controller.js` & `src/utils/asyncHandler.js`)**:
+   - `asyncHandler`: High-order wrapper that catches promise errors and forwards them to `next(err)`.
+   - Controller handles logic, validation, DB queries, and triggers responses.
+
+6. **Models & Schema Hooks (`src/models/user.model.js`)**:
+   - Mongoose `pre("save")` hook: Hashes passwords using `bcrypt.hash()` before writing to DB.
+   - Custom methods: `isPasswordCorrect()`, `generateAccessToken()`, `generateRefreshToken()`.
+
+7. **Standardized Responses & Errors**:
+   - `ApiResponse`: Formats successful HTTP responses (`statusCode`, `data`, `message`, `success`).
+   - `ApiError`: Formats error responses and stack traces.
