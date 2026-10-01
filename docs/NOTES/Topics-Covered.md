@@ -1,17 +1,17 @@
 ### Topics Learned
 
-Video 7: 
+## Video 7: 
 * prettier package
 * nodemon package
 * iify
 * modular way of connecting to DB from db folder
 * Node's process.exit()  and exit(0), exit(1) etc 
 
-Video-8: 
+## Video-8: 
 * cors package
 * cookie-parser package
 
-Video-9:
+## Video-9:
 * mongoose-aggregate-paginate-v2 package
 * bcrypt package
 * jsonwebtoken package
@@ -19,9 +19,9 @@ Video-9:
 - ACCESS_TOKEN_SECRET
 - REFRESH_TOKEN_SECRET
 
-Video-10:
+## Video-10:
 * cloudinary package
 * multer package
 
-Video-12:
+## Video-12:
 * POSTMAN Tool for API Testing
