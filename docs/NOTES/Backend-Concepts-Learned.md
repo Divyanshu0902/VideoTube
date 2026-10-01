@@ -30,7 +30,11 @@ node.js "fs" module also provides this functionality under the name of "unlink".
 
 # Video 12: 
 
-1.
+# Video 13: 
+1. user model that we exported , was created with the help of mongoose,
+so, it(the exported User Model) can directly contact the mongoDB data base
+so, whenever now calling MongoDB is required, import the model and it will call db on your behalf.
+
 
 # Antigravity Project Audit: 
 ## Complete Backend Control Flow (Start to End)
