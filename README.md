@@ -1,6 +1,10 @@
-﻿<div align="center">
+﻿<p align="center">
+  <img src="./public/assets/VideoTube-banner_compressed.png" alt="VideoTube Banner" width="100%" />
+</p>
 
-# 🎬 VideoTube Backend
+<div align="center">
+
+# 🎬 VideoTube
 
 **A production-ready, scalable video hosting & streaming REST API built with Node.js, Express, and MongoDB.**
 
