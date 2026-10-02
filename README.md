@@ -2,7 +2,7 @@
   <img src="./public/assets/VideoTube-banner_compressed.png" alt="VideoTube Banner" width="100%" />
 </p> -->
 
-![Banner](./public/assets/VideoTube-banner.png)
+![Banner](./public/assets/VideoTube-banner2.png)
 
 <div align="center">
 
@@ -69,8 +69,8 @@ src/
 ### 1. Clone & Install Dependencies
 
 ```bash
-git clone https://github.com/Divyanshu0902/YouTube-clone.git
-cd YouTube-clone
+git clone https://github.com/Divyanshu0902/VideoTube.git
+cd VideoTube
 npm install
 ```
 
