@@ -2,7 +2,7 @@
   <img src="./public/assets/VideoTube-banner_compressed.png" alt="VideoTube Banner" width="100%" />
 </p> -->
 
-![Banner](./public/assets/VideoTube-banner3.png)
+![Banner](./public/assets/VideoTube-banner1.png)
 
 <div align="center">
 
