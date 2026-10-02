@@ -1,10 +1,12 @@
-﻿<p align="center">
+﻿<!-- <p align="center">
   <img src="./public/assets/VideoTube-banner_compressed.png" alt="VideoTube Banner" width="100%" />
-</p>
+</p> -->
+
+![Banner](./public/assets/VideoTube-banner.png)
 
 <div align="center">
 
-# 🎬 VideoTube
+<!-- # 🎬 VideoTube -->
 
 **A production-ready, scalable video hosting & streaming REST API built with Node.js, Express, and MongoDB.**
 
