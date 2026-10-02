@@ -1,4 +1,6 @@
-# Video 8: 
+# Backend Concepts Learned in various Videos of the Course 
+
+## Video 8: 
 
 1. `app.get(someFunction()) ` is used to assign any configuration/middleware to the app. <br>
 2. request data can come in several ways - in url, in body, in json, form inside body etc. <br>
@@ -6,7 +8,8 @@
 3. **Higher Order Function** : a JS funciton that can do either of the two : 1.take another function as its input or 
 return another function as its output. It has been used in project for creating the *asyncHandler.js* utility fn. <br>
 
-# Video 9: 
+## Video 9: 
+
 1. When we are using mongoose-aggregate-paginate-v2   "pre" hook for encrypting password using bcrypt package, we have to give a callback fn as a parameter. Now don't write that callback using arrow fn <() => {}> , because this particular callback needs the reference to "this" which is not available to arrow fn style callbacks but it IS available to normal function callbacks. <br>
 
 2. also since encryption is a lengthy process, always make sure to also write async before that callback.<br> 
@@ -35,6 +38,37 @@ node.js "fs" module also provides this functionality under the name of "unlink".
 so, it(the exported User Model) can directly contact the mongoDB data base
 so, whenever now calling MongoDB is required, import the model and it will call db on your behalf.
 
+# Video 14: 
+
+* Cloudinary Response
+
+* The response object returned by cloudinary after successfull upload of a file is as follows
+(copy pasted from console log of the response obj)--
+```js
+ {
+  asset_id: 'cd9630ce2f31d90beee380a123204114',
+  public_id: 'lnpb4ss8s0zrgy3jydtx',
+  version: 1790924443,
+  version_id: 'b01bc2850f239d8ac5cf084f0b2d1c39',
+  signature: '620a188738bd8c637dfd757015162e313426c430',
+  width: 1230,
+  height: 1712,
+  format: 'jpg',
+  resource_type: 'image',
+  created_at: '2026-10-02T07:00:43Z',
+  tags: [],
+  bytes: 839295,
+  type: 'upload',
+  etag: 'a871de547da0df80535fd7f3eb5ff262',
+  placeholder: false,
+  url: 'http://res.cloudinary.com/venleyyf/image/upload/v1790924443/lnpb4ss8s0zrgy3jydtx.jpg',
+  secure_url: 'https://res.cloudinary.com/venleyyf/image/upload/v1790924443/lnpb4ss8s0zrgy3jydtx.jpg',
+  asset_folder: '',
+  display_name: 'lnpb4ss8s0zrgy3jydtx',
+  original_filename: 'IMG_20250811_135954',
+  api_key: '212674347498593'
+}
+```
 
 # Antigravity Project Audit: 
 ## Complete Backend Control Flow (Start to End)

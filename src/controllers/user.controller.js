@@ -28,7 +28,7 @@ const registerUser = asyncHandler( async (req,res) => {
     const {fullName, email, username, password} = req.body
     if(
         [fullName, email, username, password].some( field => field?.trim() === "")
-        // **complete explanation of above line at the end of the file
+        // **complete explanation of above line is in the practice-docs and other 
     ){
         throw new ApiError(400, "All fields are required!") 
     }
@@ -37,7 +37,7 @@ const registerUser = asyncHandler( async (req,res) => {
 
     // ## STEP 3: Checking if the username used for the new registratin already exists in DB :
 
-    const existingUser = User.findOne(
+    const existingUser = await User.findOne(
         // the code inside the { } of findOne() is DB-Query for MongoDB
         {
             $or: [{ username }, { email }]
@@ -45,7 +45,7 @@ const registerUser = asyncHandler( async (req,res) => {
     )
 
     if(existingUser){
-        throw new ApiError.status(409, "User with this email or Usernae aleady exists.")
+        throw new ApiError(409, "User with this email or Usernae aleady exists.")
     }
 
 
@@ -97,7 +97,7 @@ const registerUser = asyncHandler( async (req,res) => {
     // ## STEP 7: Checking user creation in DB (by trying to retrieve it, using the _id created by DB) 
     // ## STEP 8: Removing password from the retrieved object before sending it in the response :---
 
-    const createdUser = User.findById(user._id).select("-password -refreshToken")
+    const createdUser = await User.findById(user._id).select("-password -refreshToken")
     // for every element created in MongoDB, the MongoDB created an _id for it.
     // we're checking whether user is created or not by checking this _id
     // in .select() , all fields are selected by default.
