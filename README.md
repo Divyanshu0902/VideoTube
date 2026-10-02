@@ -5,7 +5,6 @@
 <div align="center">
 
 # 🎬 VideoTube
-# 🎬 VideoTube
 
 **A production-ready, scalable video hosting & streaming REST API built with Node.js, Express, and MongoDB.**
 
