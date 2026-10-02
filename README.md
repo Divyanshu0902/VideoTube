@@ -64,7 +64,7 @@ src/
 
 ---
 
-## 🚀 Quick Start
+## ⚙️ Quick Start
 
 ### 1. Clone & Install Dependencies
 
@@ -105,7 +105,7 @@ Server will start listening on `http://localhost:8000`.
 
 ---
 
-## 👥 Author
+## 👤 Author
 
 **Divyanshu Kumar**  
 - GitHub: [@Divyanshu0902](https://github.com/Divyanshu0902)
